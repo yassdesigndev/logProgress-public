@@ -2,7 +2,7 @@
 
 A Progressive Web App (PWA) for tracking finances, health metrics, and daily habits. Built with React, Vite, and TypeScript.
 
-![logProgress Screenshot](https://github.com/yassdesigndev/logProgress-public/logprogress.png)
+![logProgress Screenshot](https://github.com/yassdesigndev/logProgress-public/public/logprogress.png)
 
 ## Features
 
