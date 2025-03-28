@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { format, parseISO, subMonths, addMonths, startOfYear, endOfYear } from 'date-fns';
-import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -64,34 +64,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ activities, onDelete, dark
   const activityNames = Array.from(new Set(activities.map(a => a.name)));
 
   const chartData = {
-    labels: activityNames.map(name => {
-      return [
-        name,
-        React.createElement('button', {
-          key: `delete-${name}`,
-          onClick: () => onDelete(name),
-          className: 'text-red-500 hover:text-red-700 ml-2',
-          children: React.createElement(Trash2, { size: 16 })
-        })
-      ];
-    }),
+    labels: activityNames,
     datasets: [{
       data: activityNames.map(name => stats.get(name)?.value || 0),
-      backgroundColor: [
-        'rgba(54, 162, 235, 0.5)',
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(255, 206, 86, 0.5)',
-        'rgba(75, 192, 192, 0.5)',
-        'rgba(153, 102, 255, 0.5)',
-      ],
-      borderColor: [
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 99, 132, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-      ],
-      borderWidth: 1,
+      backgroundColor: darkMode
+        ? [
+            'rgba(96, 165, 250, 0.9)',
+            'rgba(167, 139, 250, 0.9)',
+            'rgba(248, 113, 113, 0.9)',
+            'rgba(52, 211, 153, 0.9)',
+            'rgba(251, 191, 36, 0.9)',
+          ]
+        : [
+            'rgba(59, 130, 246, 0.9)',
+            'rgba(124, 58, 237, 0.9)',
+            'rgba(239, 68, 68, 0.9)',
+            'rgba(16, 185, 129, 0.9)',
+            'rgba(245, 158, 11, 0.9)',
+          ],
+      borderWidth: 0,
+      borderRadius: 8,
     }]
   };
 
@@ -107,18 +99,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ activities, onDelete, dark
         enabled: false,
       },
       datalabels: {
-        color: darkMode ? '#fff' : '#000',
-        font: {
-          weight: 'bold' as const,
-          size: 14,
-        },
-        formatter: (value: number, context: any) => {
-          if (value === 0) return '';
-          const activity = stats.get(activityNames[context.dataIndex]);
-          return `${value}${activity?.unit ? ` ${activity.unit}` : ''}`;
-        },
-        anchor: 'center' as const,
-        align: 'center' as const,
+        display: false, // Disable datalabels inside bars
       },
     },
     scales: {
@@ -126,9 +107,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ activities, onDelete, dark
         beginAtZero: true,
         grid: {
           color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+          drawBorder: false,
         },
         ticks: {
-          color: darkMode ? '#fff' : '#000',
+          color: darkMode ? '#9CA3AF' : '#6B7280',
+          font: {
+            family: 'Inter var',
+            size: 12,
+          },
           callback: (value: number) => {
             return value.toLocaleString();
           }
@@ -139,86 +125,87 @@ export const Dashboard: React.FC<DashboardProps> = ({ activities, onDelete, dark
           display: false,
         },
         ticks: {
-          color: darkMode ? '#fff' : '#000',
-          callback: (value: any) => {
-            return activityNames[value];
+          color: darkMode ? '#9CA3AF' : '#6B7280',
+          font: {
+            family: 'Inter var',
+            size: 12,
+            weight: 'bold',
+          },
+          callback: (value: any, index: number) => {
+  const name = activityNames[index];
+  const stat = stats.get(name);
+  const valueWithUnit = `${stat?.value}${stat?.unit ? ` ${stat.unit}` : ''}`;
+  return [name, valueWithUnit]; // ← this creates two lines
           }
         }
       }
     },
   };
 
-  const handleMonthChange = (increment: boolean) => {
-    setSelectedDate(increment ? addMonths(selectedDate, 1) : subMonths(selectedDate, 1));
+  const handleDateChange = (increment: boolean) => {
+    if (timeframe === 'monthly') {
+      setSelectedDate(increment ? addMonths(selectedDate, 1) : subMonths(selectedDate, 1));
+    } else {
+      setSelectedDate(new Date(selectedDate.getFullYear() + (increment ? 1 : -1), 0, 1));
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => handleMonthChange(false)}
-            className={`p-2 rounded-full ${
-              darkMode 
-                ? 'hover:bg-gray-700 text-gray-300' 
-                : 'hover:bg-gray-100 text-gray-600'
-            }`}
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <span className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            {timeframe === 'monthly' 
-              ? format(selectedDate, 'MMMM yyyy')
-              : format(selectedDate, 'yyyy')}
-          </span>
-          <button
-            onClick={() => handleMonthChange(true)}
-            className={`p-2 rounded-full ${
-              darkMode 
-                ? 'hover:bg-gray-700 text-gray-300' 
-                : 'hover:bg-gray-100 text-gray-600'
-            }`}
-          >
-            <ChevronRight size={20} />
-          </button>
+      <div className="glass card p-6">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button
+              onClick={() => handleDateChange(false)}
+              className={`p-1 rounded-full ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="flex items-center gap-1">
+              <Calendar size={20} className={darkMode ? 'text-gray-400' : 'text-gray-500'} />
+              <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                {timeframe === 'monthly' 
+                  ? format(selectedDate, 'MMMM yyyy')
+                  : format(selectedDate, 'yyyy')}
+              </span>
+            </div>
+            <button
+              onClick={() => handleDateChange(true)}
+              className={`p-2 rounded-full ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+            >
+              <ChevronRight size={20} />
+            </button>
+            <div className="flex gap-2 ml-2">
+              <button
+                onClick={() => setTimeframe('monthly')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  timeframe === 'monthly'
+                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                    : darkMode 
+                      ? 'text-gray-300 hover:text-white' 
+                      : 'text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setTimeframe('yearly')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  timeframe === 'yearly'
+                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                    : darkMode 
+                      ? 'text-gray-300 hover:text-white' 
+                      : 'text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                Yearly
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setTimeframe('monthly')}
-            className={`px-4 py-2 rounded-lg ${
-              timeframe === 'monthly'
-                ? 'bg-blue-500 text-white'
-                : darkMode 
-                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setTimeframe('yearly')}
-            className={`px-4 py-2 rounded-lg ${
-              timeframe === 'yearly'
-                ? 'bg-blue-500 text-white'
-                : darkMode 
-                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Yearly
-          </button>
-        </div>
-      </div>
 
-      <div className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-          Activities
-        </h3>
         <div className="h-[600px]">
-          <Bar 
-            data={chartData} 
-            options={chartOptions}
-          />
+          <Bar data={chartData} options={chartOptions} />
         </div>
       </div>
     </div>

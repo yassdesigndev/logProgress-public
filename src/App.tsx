@@ -59,23 +59,27 @@ function App() {
   };
 
   return (
-    <div className={`min-h-full w-full ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`min-h-full w-full bg-gradient-to-br ${darkMode ? 'from-gray-900 to-gray-800' : 'from-blue-50 to-indigo-50'}`}>
       <div className="container mx-auto px-4 py-8 overflow-y-auto">
         <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className={`text-3xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+          <div className="glass card p-6">
+            <h1 className={`text-4xl font-bold mb-2 bg-gradient-to-r ${
+              darkMode 
+                ? 'from-blue-400 to-indigo-400' 
+                : 'from-blue-600 to-indigo-600'
+            } inline-block text-transparent bg-clip-text`}>
               logProgress
             </h1>
-            <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               Track your finances, health, and daily habits
             </p>
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`p-2 rounded-lg ${
+            className={`p-3 rounded-full glass transition-all duration-300 hover:scale-110 ${
               darkMode 
-                ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                : 'bg-white text-gray-700 hover:bg-gray-50'
+                ? 'text-yellow-400 hover:text-yellow-300' 
+                : 'text-gray-700 hover:text-gray-900'
             }`}
           >
             {darkMode ? <Sun size={24} /> : <Moon size={24} />}
@@ -92,12 +96,12 @@ function App() {
               <div className="flex space-x-4">
                 <button
                   onClick={() => setView('list')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
                     view === 'list'
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                       : darkMode 
-                        ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'glass hover:bg-gray-800 text-gray-200'
+                        : 'glass hover:bg-white/90 text-gray-700'
                   }`}
                 >
                   <ListTodo size={20} />
@@ -105,12 +109,12 @@ function App() {
                 </button>
                 <button
                   onClick={() => setView('dashboard')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
                     view === 'dashboard'
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                       : darkMode 
-                        ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'glass hover:bg-gray-800 text-gray-200'
+                        : 'glass hover:bg-white/90 text-gray-700'
                   }`}
                 >
                   <BarChart3 size={20} />
@@ -139,4 +143,4 @@ function App() {
   );
 }
 
-export default App;
+export default App
